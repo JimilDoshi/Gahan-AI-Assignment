@@ -106,7 +106,7 @@ ros2_ws/
 └── Media_Proof/
     ├── Folder_Structure.png
     ├── Task1_Nav2/
-    │   ├── Screen Recording/       # .webm videos
+    │   ├── Screen Recording/       # .mp4 videos
     │   └── Screenshots/            # Organised by category
     └── Task2_ROS_Programming/      # Screenshots of running nodes
 ```
@@ -587,14 +587,14 @@ All proof of task completion is in `Media_Proof/`.
 
 | File | Contents |
 |---|---|
-| `SLAM_Gazebo.webm` | SLAM running in Gazebo — robot driving and building the map |
-| `SLAM_Mapping.webm` | SLAM Toolbox mapping in RViz |
-| `Slam_map.webm` | Live map construction visible in RViz |
-| `Map_saving.webm` | Terminal output of `map_saver_cli` saving the map |
-| `RViz_Gazebo_RQT.webm` | RViz + Gazebo + RQT running simultaneously |
-| `Topic_Echo_&_Map.webm` | `ros2 topic echo` showing live LIDAR/IMU/odom data + map |
-| `Nav2_Proof.webm` | Autonomous goal navigation in Nav2 |
-| `Nav_Vid.webm` | Additional Nav2 goal navigation clip |
+| `SLAM_Gazebo.mp4` | SLAM running in Gazebo — robot driving and building the map |
+| `SLAM_Mapping.mp4` | SLAM Toolbox mapping in RViz |
+| `Slam_map.mp4` | Live map construction visible in RViz |
+| `Map_saving.mp4` | Terminal output of `map_saver_cli` saving the map |
+| `RViz_Gazebo_RQT.mp4` | RViz + Gazebo + RQT running simultaneously |
+| `Topic_Echo_&_Map.mp4` | `ros2 topic echo` showing live LIDAR/IMU/odom data + map |
+| `Nav2_Proof.mp4` | Autonomous goal navigation in Nav2 |
+| `Nav_Vid.mp4` | Additional Nav2 goal navigation clip |
 
 #### Screenshots (`Screenshots/`)
 
