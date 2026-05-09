@@ -1,0 +1,401 @@
+<?xml version="1.0"?>
+<robot name="training_robot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!--
+    COORDINATE MODEL
+    ─────────────────────────────────────────────────────────────────────
+    base_footprint  : ground plane, z = 0  (root link)
+    base_link       : chassis centre, z = wheel_radius + base_height/2
+                      = 0.09 + 0.06 = 0.15 above ground
+    wheel joints    : z = -(base_height/2) relative to base_link
+                      = 0.15 - 0.06 = 0.09 above ground  ✓ (= wheel_radius)
+    caster joint    : z chosen so sphere bottom = wheel bottom = 0
+                      caster_bottom = joint_z - sphere_radius = 0
+                      → joint_z = +sphere_radius = +0.04
+                      relative to base_link: 0.04 - 0.15 = -0.11
+    ─────────────────────────────────────────────────────────────────────
+  -->
+
+  <!-- ================= BASE FOOTPRINT (ground reference) ================= -->
+  <link name="base_footprint"/>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child  link="base_link"/>
+    <!-- Raise base_link so chassis bottom sits at wheel_radius above ground -->
+    <!-- chassis centre = wheel_radius + base_height/2 = 0.09 + 0.06 = 0.15 -->
+    <origin xyz="0 0 0.15" rpy="0 0 0"/>
+  </joint>
+
+
+  <!-- ================= BASE LINK ================= -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="0.35 0.25 0.12"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="blue">
+        <color rgba="0 0 0.8 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <box size="0.35 0.25 0.12"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+
+    <inertial>
+      <mass value="2.2"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <!-- Solid box inertia: m=2.2, l=0.35, w=0.25, h=0.12 -->
+      <inertia ixx="0.0143" ixy="0" ixz="0"
+               iyy="0.0292" iyz="0"
+               izz="0.0381"/>
+    </inertial>
+  </link>
+
+
+  <!-- ================= LEFT WHEEL ================= -->
+  <link name="left_wheel">
+    <visual>
+      <geometry>
+        <cylinder radius="0.09" length="0.05"/>
+      </geometry>
+      <!-- rpy rotates cylinder axis from Z to Y (wheel axle direction) -->
+      <origin xyz="0 0 0" rpy="1.5707 0 0"/>
+      <material name="black">
+        <color rgba="0.05 0.05 0.05 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <cylinder radius="0.09" length="0.05"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="1.5707 0 0"/>
+    </collision>
+
+    <inertial>
+      <mass value="0.35"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <!-- Solid cylinder: Ixx=Iyy=(m/12)*(3r²+h²), Izz=(m/2)*r² -->
+      <inertia ixx="0.001429" ixy="0" ixz="0"
+               iyy="0.001429" iyz="0"
+               izz="0.001418"/>
+    </inertial>
+  </link>
+
+  <joint name="left_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child  link="left_wheel"/>
+    <!--
+      x=0.02  : slightly forward of chassis centre (matches your intent)
+      y=0.15  : half wheel-track (matches your value)
+      z=-0.06 : = -(base_height/2), puts axle at wheel_radius above ground
+    -->
+    <origin xyz="0.02 0.15 -0.06" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+
+  <!-- ================= RIGHT WHEEL ================= -->
+  <link name="right_wheel">
+    <visual>
+      <geometry>
+        <cylinder radius="0.09" length="0.05"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="1.5707 0 0"/>
+      <material name="black">
+        <color rgba="0.05 0.05 0.05 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <cylinder radius="0.09" length="0.05"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="1.5707 0 0"/>
+    </collision>
+
+    <inertial>
+      <mass value="0.35"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.001429" ixy="0" ixz="0"
+               iyy="0.001429" iyz="0"
+               izz="0.001418"/>
+    </inertial>
+  </link>
+
+  <joint name="right_wheel_joint" type="continuous">
+    <parent link="base_link"/>
+    <child  link="right_wheel"/>
+    <origin xyz="0.02 -0.15 -0.06" rpy="0 0 0"/>
+    <axis xyz="0 1 0"/>
+  </joint>
+
+
+  <!-- ================= REAR CASTER STEM (mount connecting chassis to ball) ================= -->
+  <link name="caster_stem">
+    <visual>
+      <geometry>
+        <!-- Stem height = gap between chassis bottom and caster top
+             chassis bottom world z = 0.09
+             caster top world z     = 0.04 + 0.04 = 0.08
+             gap = 0.09 - 0.08 = 0.01 → use 0.01 height cylinder -->
+        <cylinder radius="0.01" length="0.01"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="grey">
+        <color rgba="0.5 0.5 0.5 1"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <cylinder radius="0.01" length="0.01"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+    <inertial>
+      <mass value="0.01"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0"
+               iyy="0.000001" iyz="0"
+               izz="0.000001"/>
+    </inertial>
+  </link>
+
+  <!-- Stem attaches to chassis bottom centre-rear -->
+  <joint name="caster_stem_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="caster_stem"/>
+    <!--
+      Chassis bottom = z = -0.06 relative to base_link.
+      Stem hangs down from there, stem centre = -0.06 - 0.005 = -0.065
+    -->
+    <origin xyz="-0.13 0 -0.065" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ================= REAR CASTER BALL ================= -->
+  <link name="caster_wheel">
+    <visual>
+      <geometry>
+        <sphere radius="0.04"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="grey">
+        <color rgba="0.7 0.7 0.7 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <sphere radius="0.04"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+
+    <inertial>
+      <mass value="0.15"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <!-- Solid sphere: I = (2/5)*m*r² -->
+      <inertia ixx="0.000096" ixy="0" ixz="0"
+               iyy="0.000096" iyz="0"
+               izz="0.000096"/>
+    </inertial>
+  </link>
+
+  <!-- Ball hangs at the bottom of the stem -->
+  <joint name="caster_joint" type="fixed">
+    <parent link="caster_stem"/>
+    <child  link="caster_wheel"/>
+    <!--
+      Stem centre is at world z = 0.15 - 0.065 = 0.085
+      Ball centre must be at world z = caster_radius = 0.04
+      joint_z relative to stem = 0.04 - 0.085 = -0.045
+    -->
+    <origin xyz="0 0 -0.045" rpy="0 0 0"/>
+  </joint>
+
+
+  <!-- ================= IMU ================= -->
+  <link name="imu_link">
+    <visual>
+      <geometry>
+        <box size="0.04 0.04 0.02"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="red">
+        <color rgba="0.8 0 0 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <box size="0.04 0.04 0.02"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+
+    <inertial>
+      <mass value="0.01"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.000001" ixy="0" ixz="0"
+               iyy="0.000001" iyz="0"
+               izz="0.000001"/>
+    </inertial>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="imu_link"/>
+    <!-- Mounted flat on top of chassis -->
+    <origin xyz="0 0 0.07" rpy="0 0 0"/>
+  </joint>
+
+
+  <!-- ================= LIDAR ================= -->
+  <!--
+    Named laser_link to match your intent.
+    The Gazebo plugin's <frame_name> below is set to laser_link to match.
+  -->
+  <link name="laser_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.045" length="0.05"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <material name="silver">
+        <color rgba="0.9 0.9 0.9 1"/>
+      </material>
+    </visual>
+
+    <collision>
+      <geometry>
+        <cylinder radius="0.045" length="0.05"/>
+      </geometry>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </collision>
+
+    <inertial>
+      <mass value="0.2"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <inertia ixx="0.000117" ixy="0" ixz="0"
+               iyy="0.000117" iyz="0"
+               izz="0.000203"/>
+    </inertial>
+  </link>
+
+  <joint name="laser_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="laser_link"/>
+    <!-- Mounted on top of chassis, centred fore-aft -->
+    <origin xyz="0.12 0 0.085" rpy="0 0 0"/>
+  </joint>
+
+
+  <!-- ================================================================
+       GAZEBO PLUGINS
+       ================================================================ -->
+
+  <!-- Differential drive — /cmd_vel in, /odom + TF out -->
+  <gazebo>
+    <plugin name="diff_drive_controller" filename="libgazebo_ros_diff_drive.so">
+      <ros>
+        <namespace>/</namespace>
+      </ros>
+      <left_joint>left_wheel_joint</left_joint>
+      <right_joint>right_wheel_joint</right_joint>
+      <!-- wheel_separation = distance between wheel centres = 0.15*2 = 0.30 -->
+      <wheel_separation>0.30</wheel_separation>
+      <!-- wheel_diameter = 2 * wheel_radius = 0.18 -->
+      <wheel_diameter>0.18</wheel_diameter>
+      <max_wheel_torque>20</max_wheel_torque>
+      <max_wheel_acceleration>1.0</max_wheel_acceleration>
+      <command_topic>cmd_vel</command_topic>
+      <publish_odom>true</publish_odom>
+      <publish_odom_tf>true</publish_odom_tf>
+      <publish_wheel_tf>true</publish_wheel_tf>
+      <odometry_topic>odom</odometry_topic>
+      <odometry_frame>odom</odometry_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+    </plugin>
+  </gazebo>
+
+  <!-- IMU — publishes to /imu -->
+  <gazebo reference="imu_link">
+    <sensor name="imu_sensor" type="imu">
+      <always_on>true</always_on>
+      <update_rate>50</update_rate>
+      <visualize>true</visualize>
+      <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+        <ros>
+          <namespace>/</namespace>
+          <remapping>~/out:=imu</remapping>
+        </ros>
+        <initial_orientation_as_reference>false</initial_orientation_as_reference>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- LIDAR — publishes to /scan -->
+  <gazebo reference="laser_link">
+    <sensor name="lidar_sensor" type="ray">
+      <always_on>true</always_on>
+      <visualize>true</visualize>
+      <update_rate>10</update_rate>
+      <ray>
+        <scan>
+          <horizontal>
+            <samples>360</samples>
+            <resolution>1</resolution>
+            <min_angle>-3.14159</min_angle>
+            <max_angle>3.14159</max_angle>
+          </horizontal>
+        </scan>
+        <range>
+          <min>0.12</min>
+          <max>10.0</max>
+          <resolution>0.01</resolution>
+        </range>
+        <noise>
+          <type>gaussian</type>
+          <mean>0.0</mean>
+          <stddev>0.01</stddev>
+        </noise>
+      </ray>
+      <plugin filename="libgazebo_ros_ray_sensor.so" name="lidar_plugin">
+        <ros>
+          <namespace>/</namespace>
+          <remapping>~/out:=scan</remapping>
+        </ros>
+        <output_type>sensor_msgs/LaserScan</output_type>
+        <!-- Must match the link name above -->
+        <frame_name>laser_link</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <!-- Zero caster friction — lets it slide freely, no fighting the drive wheels -->
+  <gazebo reference="caster_wheel">
+    <material>Gazebo/Grey</material>
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+  </gazebo>
+
+  <gazebo reference="caster_stem">
+    <material>Gazebo/Grey</material>
+    <mu1>0.0</mu1>
+    <mu2>0.0</mu2>
+  </gazebo>
+
+  <!-- Gazebo colours -->
+  <gazebo reference="base_link">  <material>Gazebo/Blue</material>   </gazebo>
+  <gazebo reference="left_wheel"> <material>Gazebo/Black</material>  </gazebo>
+  <gazebo reference="right_wheel"><material>Gazebo/Black</material>  </gazebo>
+  <gazebo reference="imu_link">   <material>Gazebo/Red</material>    </gazebo>
+  <gazebo reference="laser_link"> <material>Gazebo/Grey</material>   </gazebo>
+
+</robot>
